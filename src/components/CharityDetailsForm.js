@@ -172,7 +172,7 @@ const CharityDetailsForm = ({ charityData, handleInputChange }) => {
                         >
                             &times;
                         </button>
-                        <h3 className="text-lg font-semibold mb-4">Select Your Location</h3>
+                        <h3 className="text-lg font-semibold mb-2">Select Your Location</h3>
                         <SearchLocationInput
                             setSelectedLocation={setSelectedLocation}
                             setSelectedAddress={handleAddressSelect}
@@ -184,7 +184,7 @@ const CharityDetailsForm = ({ charityData, handleInputChange }) => {
                             <textarea
                                 value={selectedAddress}
                                 readOnly
-                                className="w-full h-20 p-2 border rounded"
+                                className="w-full h-10 p-2 border rounded"
                             />
                         </div>
                         <button
