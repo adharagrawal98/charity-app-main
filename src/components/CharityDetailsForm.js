@@ -53,7 +53,12 @@ const CharityDetailsForm = ({ charityData, handleInputChange }) => {
     const handleAddressSelect = (address) => {
         handleInputChange({ target: { name: "address", value: address } });
         setSelectedAddress(address);
+        // Do not close the modal here
+    };
+
+    const confirmLocation = () => {
         setIsModalOpen(false);
+        handleInputChange({ target: { name: "address", value: selectedAddress } });
     };
 
     return (
@@ -126,7 +131,7 @@ const CharityDetailsForm = ({ charityData, handleInputChange }) => {
                     name="address"
                     value={charityData.address || selectedAddress}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded"
+                    className="w-full min-w-[300px] p-2 border rounded"
                     required
                 />
                 <button
@@ -173,6 +178,22 @@ const CharityDetailsForm = ({ charityData, handleInputChange }) => {
                             setSelectedAddress={handleAddressSelect}
                         />
                         <MapComponent selectedLocation={selectedLocation} />
+                        {/* Display the selected address in full width */}
+                        <div className="mt-4 w-full">
+                            <label className="block mb-2">Selected Address:</label>
+                            <textarea
+                                value={selectedAddress}
+                                readOnly
+                                className="w-full h-20 p-2 border rounded"
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            onClick={confirmLocation}
+                            className="mt-4 w-full bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 transition duration-200"
+                        >
+                            Confirm Location
+                        </button>
                     </div>
                 </div>
             )}
