@@ -1,5 +1,5 @@
-// SearchLocationInput.js
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { REACT_APP_GOOGLE_MAPS_KEY } from "../constants/constants";
 
 // Function to load the Google Maps script
 const loadScript = (url, callback) => {
@@ -24,9 +24,9 @@ const loadScript = (url, callback) => {
 const SearchLocationInput = ({ setSelectedLocation, setSelectedAddress }) => {
   const [query, setQuery] = useState("");
   const autoCompleteRef = useRef(null);
-  const googleMapsApiKey = 'REACT_APP_GOOGLE_MAPS_KEY'; // Replace with your actual API key
 
-  const handleScriptLoad = (updateQuery, autoCompleteRef) => {
+  // Define handleScriptLoad with useCallback
+  const handleScriptLoad = useCallback((updateQuery, autoCompleteRef) => {
     const autoComplete = new window.google.maps.places.Autocomplete(
       autoCompleteRef.current,
       { componentRestrictions: { country: "GB" } }
@@ -47,25 +47,26 @@ const SearchLocationInput = ({ setSelectedLocation, setSelectedAddress }) => {
         setSelectedLocation(latLng);
       }
     });
-  };
+  }, [setSelectedAddress, setSelectedLocation]); // Dependencies here if needed
 
   useEffect(() => {
     if (!window.google) {
       loadScript(
-        `https://maps.googleapis.com/maps/api/js?key=${'AIzaSyAQcmhvqFdbtCb9L7FIRII4PNY4Tv8MTFI'}&libraries=places`,
+        `https://maps.googleapis.com/maps/api/js?key=${REACT_APP_GOOGLE_MAPS_KEY}&libraries=places`,
         () => handleScriptLoad(setQuery, autoCompleteRef)
       );
     } else {
       handleScriptLoad(setQuery, autoCompleteRef);
     }
-  }, []);
+  }, [handleScriptLoad]);
 
   return (
     <div className="search-location-input mt-1">
       <label>Type in your suburb or postcode</label>
       <input
         ref={autoCompleteRef}
-        className="form-control ml-5"
+        className="form-control ml-5 bord"
+        style={{ border: "1px solid black" }}
         onChange={(event) => setQuery(event.target.value)}
         placeholder="Search Places ..."
         value={query}
