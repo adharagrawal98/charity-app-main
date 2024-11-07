@@ -10,6 +10,7 @@ import Home from './components/Home';
 import ShelterDashboard from './components/ShelterDashboard'; // Import your Shelter Dashboard
 import ContactForm from './components/ContactUs';
 import Testimonials from './components/Testimonials';
+import DonorMap from './components/DonorMap';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -97,6 +98,7 @@ const App = () => {
         <Route path="/" element={user ? <Navigate to={userRole === 'Donor' ? '/home' : '/shelter-dashboard'} /> : <Navigate to="/login" />} />
         <Route path="/testimonials" element={<Testimonials />} />
         <Route path="/contact-us" element={<ContactForm />} />
+        <Route path="/donor-map" element={<DonorMap />} />
       </Routes>
     </div>
   );
