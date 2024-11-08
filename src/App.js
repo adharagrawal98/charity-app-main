@@ -11,6 +11,9 @@ import ShelterDashboard from './components/ShelterDashboard'; // Import your She
 import ContactForm from './components/ContactUs';
 import Testimonials from './components/Testimonials';
 import DonorMap from './components/DonorMap';
+import CharityPaymentPage from './components/CharityPaymentPage'
+import ReceiptPage from './components/ReceiptPage';
+import PaymentConfirmationPage from './components/PaymentConfirmationPage';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -99,6 +102,9 @@ const App = () => {
         <Route path="/testimonials" element={<Testimonials />} />
         <Route path="/contact-us" element={<ContactForm />} />
         <Route path="/donor-map" element={<DonorMap />} />
+        <Route path="/shelter/:id" element={<CharityPaymentPage />} />
+        <Route path="/payment-confirmation" element={<PaymentConfirmationPage />} />
+
       </Routes>
     </div>
   );
