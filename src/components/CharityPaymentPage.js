@@ -1,3 +1,5 @@
+// CharityPaymentPage.js
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { db } from '../firebaseConfig';
@@ -45,7 +47,7 @@ const CharityPaymentPage = () => {
                     const authorization = await actions.order.authorize();
                     const authorizationID = authorization.purchase_units[0].payments.authorizations[0].id;
 
-                    console.log("Payment authorized:", authorizationID);
+                    console.log("Payment authorized with ID:", authorizationID);  // Check authorizationID here
 
                     // Store authorizationID in Firestore for later capture
                     await updateDoc(doc(db, "charityDetails", id), {
@@ -54,7 +56,7 @@ const CharityPaymentPage = () => {
                     });
 
                     // Redirect to payment confirmation page with authorizationID as query parameter
-                    navigate(`/payment-confirmation?charityID=${id}`);
+                    navigate(`/payment-confirmation?charityID=${id}&authorizationID=${authorizationID}`);
                 },
                 onError: (err) => {
                     console.error("Error with PayPal payment:", err);

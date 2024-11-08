@@ -1,58 +1,37 @@
-// PaymentConfirmationPage.js
+import React, { useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import { db } from '../firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+const ReceiptPage = () => {
+    const navigate = useNavigate();
+    const printRef = useRef(); // Ref for the printable section
 
-const PaymentConfirmationPage = () => {
-    const location = useLocation();
-    const printRef = useRef(); // Ref for printable section
-    const [charity, setCharity] = useState(null);
-    const [authorizationID, setAuthorizationID] = useState(null);
-    const [loading, setLoading] = useState(true);
+    // Stable reference for charity details using useMemo
+    const charity = useMemo(() => ({
+        name: "Helping Hands Shelter",
+        address: "123 Main St, Cityville",
+        description: "Providing shelter and support for those in need."
+    }), []);
 
+    // Redirect if no charity details are available
     useEffect(() => {
-        const queryParams = new URLSearchParams(location.search);
-        const charityID = queryParams.get('charityID');
-        const authID = queryParams.get('authorizationID');
-
-        setAuthorizationID(authID);
-        console.log("Authorization ID:", authID);
-
-        if (charityID) {
-            const fetchCharity = async () => {
-                try {
-                    const charityDoc = doc(db, 'charityDetails', charityID);
-                    const charityData = await getDoc(charityDoc);
-
-                    if (charityData.exists()) {
-                        setCharity(charityData.data());
-                    } else {
-                        console.error("Charity not found!");
-                    }
-                } catch (error) {
-                    console.error("Error fetching charity details:", error);
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            fetchCharity();
-        } else {
-            console.error('No charityID found in URL');
+        if (!charity) {
+            navigate('/'); // Redirect to the home page or relevant route
         }
-    }, [location]);
+    }, [charity, navigate]);
 
     const handlePrint = () => {
         const printContents = printRef.current.innerHTML;
 
+        // Create a new window
         const printWindow = window.open('', '_blank');
+
+        // Write HTML content into the new window
         printWindow.document.write(`
             <html>
                 <head>
-                    <title>Print Payment Confirmation</title>
+                    <title>Print Receipt</title>
                     <style>
+                        /* Add necessary styles here for the print layout */
                         body {
                             font-family: Arial, sans-serif;
                             display: flex;
@@ -81,6 +60,7 @@ const PaymentConfirmationPage = () => {
                         .mb-6 {
                             margin-bottom: 1.5rem;
                         }
+                        /* Additional styling for print */
                     </style>
                 </head>
                 <body>
@@ -91,23 +71,18 @@ const PaymentConfirmationPage = () => {
             </html>
         `);
 
+        // Close the document and trigger print
         printWindow.document.close();
         printWindow.print();
+
+        // Close the new window after printing
         printWindow.close();
     };
-
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <div className="text-xl">Loading payment confirmation...</div>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
             <div ref={printRef} className="bg-white shadow-lg rounded-lg p-6 w-full max-w-md mx-auto flex flex-col items-center">
-                <h1 className="text-3xl font-bold mb-6 text-center">Payment Confirmation</h1>
+                <h1 className="text-3xl font-bold mb-6 text-center">Donation Receipt</h1>
 
                 {/* QR Code Placeholder */}
                 <div className="w-48 h-48 bg-gray-200 rounded mb-6 flex items-center justify-center">
@@ -117,23 +92,23 @@ const PaymentConfirmationPage = () => {
                 {/* Charity Details */}
                 {charity ? (
                     <div className="text-center mb-6">
-                        <h2 className="text-2xl font-semibold mb-2">{charity.charityName}</h2>
+                        <h2 className="text-2xl font-semibold mb-2">{charity.name}</h2>
                         <p className="text-gray-700 mb-1">
                             <strong>Address:</strong> {charity.address}
                         </p>
                         <p className="text-gray-700 mb-1">
-                            <strong>Registration #:</strong> {charity.registrationNumber}
+                            <strong>Description:</strong> {charity.description}
                         </p>
                     </div>
                 ) : (
-                    <p className="text-gray-500 text-center mb-6">Error loading charity details.</p>
+                    <p className="text-gray-500 text-center mb-6">No charity selected.</p>
                 )}
 
                 {/* Instructions Section */}
                 <div className="text-center mb-6">
                     <h3 className="text-lg font-semibold text-gray-800 mb-2">Instructions for Donor</h3>
                     <p className="text-gray-600">
-                        <strong>Show this QR code at the charity's location to confirm your donation.</strong>
+                        <strong>Show this QR code at the charity's location to receive services.</strong>
                     </p>
                 </div>
 
@@ -147,11 +122,11 @@ const PaymentConfirmationPage = () => {
                     onClick={handlePrint}
                     className="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow hover:bg-blue-700 transition duration-200 mt-4"
                 >
-                    Print Confirmation
+                    Print Receipt
                 </button>
             </div>
         </div>
     );
 };
 
-export default PaymentConfirmationPage;
+export default ReceiptPage;
