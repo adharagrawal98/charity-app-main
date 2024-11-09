@@ -1,14 +1,14 @@
-// CharityPaymentPage.js
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { db } from '../firebaseConfig';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { QRCodeCanvas } from 'qrcode.react';  // Import QRCodeCanvas
 
 const CharityPaymentPage = () => {
     const { id } = useParams();
     const [shelter, setShelter] = useState(null);
     const [showPayPal, setShowPayPal] = useState(false);
+    const [authorizationID, setAuthorizationID] = useState(null);  // State to hold the authorization ID
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -55,6 +55,9 @@ const CharityPaymentPage = () => {
                         paymentStatus: "authorized",
                     });
 
+                    // Set the authorizationID in state
+                    setAuthorizationID(authorizationID);
+
                     // Redirect to payment confirmation page with authorizationID as query parameter
                     navigate(`/payment-confirmation?charityID=${id}&authorizationID=${authorizationID}`);
                 },
@@ -73,6 +76,8 @@ const CharityPaymentPage = () => {
         );
     }
 
+    console.log("Authorization ID: ", authorizationID);  // Debugging line to check the value of authorizationID
+
     return (
         <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-lg">
@@ -87,6 +92,10 @@ const CharityPaymentPage = () => {
                         <p className="text-lg font-semibold text-gray-700">Rate per Day:</p>
                         <p className="text-md text-gray-600">£{shelter.ratePerDay}</p>
                     </div>
+                    <div className="flex items-center justify-between">
+                        <p className="text-lg font-semibold text-gray-700">Beds Available Today:</p>
+                        <p className="text-md text-gray-600">{shelter.bedsAvailable}</p>
+                    </div>
                 </div>
 
                 <div className="mt-8">
@@ -100,6 +109,15 @@ const CharityPaymentPage = () => {
                             Proceed to Payment
                         </button>
                     )}
+
+                    {/* Display QR Code once the authorization ID is available
+                    {authorizationID && (
+                        <div className="mt-8">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Scan to Claim Payment:</h3>
+                            <QRCodeCanvas value={authorizationID} size={256} level="H" />
+                        </div>
+                    )} */}
+
                     <button
                         className="w-full py-3 mt-4 px-6 bg-blue-500 text-white text-lg font-semibold rounded-lg shadow-lg hover:bg-blue-600 transition-all duration-300"
                         onClick={() => navigate("/donor-map")}

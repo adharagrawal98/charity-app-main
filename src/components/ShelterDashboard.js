@@ -3,8 +3,6 @@ import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { FiCamera, FiEdit, FiClipboard, FiSend } from 'react-icons/fi';
 import { QrReader } from 'react-qr-reader';
 import ScannedDataTable from './ScannedDataTable';
-
-
 const ShelterDashboard = ({ user }) => {
     const [shelterData, setShelterData] = useState(null);
     const [tempData, setTempData] = useState({});
@@ -13,13 +11,11 @@ const ShelterDashboard = ({ user }) => {
     const [isScannerVisible, setIsScannerVisible] = useState(false); // Toggle QR scanner modal visibility
     const db = getFirestore();
 
-
     useEffect(() => {
         const fetchShelterData = async () => {
             if (user) {
                 const shelterRef = doc(db, 'charityDetails', user.uid);
                 const shelterDoc = await getDoc(shelterRef);
-
 
                 if (shelterDoc.exists()) {
                     setShelterData(shelterDoc.data());
@@ -28,11 +24,8 @@ const ShelterDashboard = ({ user }) => {
                 }
             }
         };
-
-
         fetchShelterData();
     }, [db, user]);
-
 
     const openEditBedInfo = () => {
         setTempData({
@@ -42,7 +35,6 @@ const ShelterDashboard = ({ user }) => {
         setIsEditBedInfoOpen(true);
     };
     const closeEditBedInfo = () => setIsEditBedInfoOpen(false);
-
 
     const handleScan = (data) => {
         if (data) {
@@ -56,12 +48,9 @@ const ShelterDashboard = ({ user }) => {
         }
     };
 
-
     const handleError = (error) => {
         console.error("QR scanner error:", error);
-        // No need to close the scanner here unless you want to provide feedback
     };
-
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -70,7 +59,6 @@ const ShelterDashboard = ({ user }) => {
             [name]: value,
         }));
     };
-
 
     const saveChanges = async () => {
         if (user) {
@@ -84,23 +72,18 @@ const ShelterDashboard = ({ user }) => {
         }
     };
 
-
     const userEmail = user ? user.email : "Loading...";
 
-
     if (!shelterData) return <p>Loading charity details...</p>;
-
 
     const toggleScanner = () => {
         setIsScannerVisible(true); // Always open scanner
     };
 
-
     const closeScanner = () => {
         setIsScannerVisible(false); // Close scanner
         setScannedData(null); // Clear scanned data when closing
     };
-
 
     return (
         <div className="p-4 md:p-8">
@@ -117,7 +100,6 @@ const ShelterDashboard = ({ user }) => {
                 </div>
             </div>
 
-
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 {/* Section 1: Shelter Overview */}
@@ -128,7 +110,6 @@ const ShelterDashboard = ({ user }) => {
                     <p className="text-lg font-bold">Charity Registration Number: {shelterData.registrationNumber}</p>
                 </div>
 
-
                 {/* Section 2: Contact Information */}
                 <div className="bg-white p-6 rounded-lg shadow-md">
                     <h3 className="text-xl font-semibold mb-4">Contact Information</h3>
@@ -136,7 +117,6 @@ const ShelterDashboard = ({ user }) => {
                     <p><span className="font-bold">Phone:</span> {shelterData.contactNumber}</p>
                     <p><span className="font-bold">Address:</span> {shelterData.address}</p>
                 </div>
-
 
                 {/* Section 3: Bed Information */}
                 <div className="bg-white p-6 rounded-lg shadow-md relative">
@@ -151,14 +131,12 @@ const ShelterDashboard = ({ user }) => {
                     </button>
                 </div>
 
-
                 {/* Section 4: Financial Information */}
                 <div className="bg-white p-6 rounded-lg shadow-md">
                     <h3 className="text-xl font-semibold mb-4">Bank Account Information</h3>
                     <p>{shelterData.bankAccountDetails}</p>
                 </div>
             </div>
-
 
             {/* Scan Button */}
             <div className="flex justify-center mb-4">
@@ -170,7 +148,6 @@ const ShelterDashboard = ({ user }) => {
                     {isScannerVisible ? "Hide Scanner" : "Scan QR Code"}
                 </button>
             </div>
-
 
             {/* QR Code Scanner Modal */}
             {isScannerVisible && (
@@ -198,7 +175,6 @@ const ShelterDashboard = ({ user }) => {
                 </div>
             )}
 
-
             {/* Scanned Data Table */}
             {scannedData && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -218,7 +194,6 @@ const ShelterDashboard = ({ user }) => {
                 </div>
             )}
 
-
             {/* Edit Bed Information Modal */}
             {isEditBedInfoOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -232,7 +207,7 @@ const ShelterDashboard = ({ user }) => {
                                 type="number"
                                 value={tempData.bedsAvailable}
                                 onChange={handleInputChange}
-                                className="border rounded p-2 w-full"
+                                className="border border-gray-300 p-2 rounded-md w-full"
                             />
                         </div>
                         <div className="mt-4">
@@ -243,19 +218,19 @@ const ShelterDashboard = ({ user }) => {
                                 type="number"
                                 value={tempData.ratePerDay}
                                 onChange={handleInputChange}
-                                className="border rounded p-2 w-full"
+                                className="border border-gray-300 p-2 rounded-md w-full"
                             />
                         </div>
-                        <div className="mt-4 flex justify-end">
+                        <div className="flex justify-end mt-6">
                             <button
                                 onClick={saveChanges}
-                                className="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600"
+                                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 mr-2"
                             >
-                                Save Changes
+                                Save
                             </button>
                             <button
                                 onClick={closeEditBedInfo}
-                                className="ml-2 bg-gray-500 text-white rounded px-4 py-2 hover:bg-gray-600"
+                                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
                             >
                                 Cancel
                             </button>
@@ -267,6 +242,4 @@ const ShelterDashboard = ({ user }) => {
     );
 };
 
-
 export default ShelterDashboard;
-

@@ -12,7 +12,6 @@ import ContactForm from './components/ContactUs';
 import Testimonials from './components/Testimonials';
 import DonorMap from './components/DonorMap';
 import CharityPaymentPage from './components/CharityPaymentPage'
-import ReceiptPage from './components/ReceiptPage';
 import PaymentConfirmationPage from './components/PaymentConfirmationPage';
 
 const App = () => {
@@ -67,7 +66,7 @@ const App = () => {
             className="text-lg font-bold flex-grow cursor-pointer"
             onClick={() => navigate('/')} // Navigate to homepage on click
           >
-            Shelter App
+            Wanna Shelter You!
           </div>
           {/* Align buttons to the right */}
           <div className="flex space-x-4"> {/* Add space between buttons */}

@@ -1,29 +1,30 @@
-// PaymentConfirmationPage.js
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { db } from '../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
+import QRCode from 'qrcode';
 
 const PaymentConfirmationPage = () => {
     const location = useLocation();
-    const printRef = useRef(); // Ref for printable section
+    const printRef = useRef();
     const [charity, setCharity] = useState(null);
     const [authorizationID, setAuthorizationID] = useState(null);
+    const [charityID, setCharityID] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [qrCodeData, setQrCodeData] = useState(null);
 
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
-        const charityID = queryParams.get('charityID');
+        const charityIDParam = queryParams.get('charityID');
         const authID = queryParams.get('authorizationID');
 
         setAuthorizationID(authID);
-        console.log("Authorization ID:", authID);
+        setCharityID(charityIDParam);
 
-        if (charityID) {
+        if (charityIDParam) {
             const fetchCharity = async () => {
                 try {
-                    const charityDoc = doc(db, 'charityDetails', charityID);
+                    const charityDoc = doc(db, 'charityDetails', charityIDParam);
                     const charityData = await getDoc(charityDoc);
 
                     if (charityData.exists()) {
@@ -44,14 +45,37 @@ const PaymentConfirmationPage = () => {
         }
     }, [location]);
 
+    // Generate the QR code image URL with authorizationID, charityID, and registrationNumber
+    const generateQrCodeData = (authID, charityID, registrationNumber) => {
+        const qrContent = JSON.stringify({
+            authorizationID: authID,
+            charityID: charityID,
+            registrationNumber: registrationNumber
+        });
+
+        QRCode.toDataURL(qrContent, { errorCorrectionLevel: 'H' }, (err, url) => {
+            if (err) {
+                console.error("Error generating QR code:", err);
+                return;
+            }
+            setQrCodeData(url);
+        });
+    };
+
+    useEffect(() => {
+        // Generate QR code when authorizationID, charityID, and registrationNumber are available
+        if (authorizationID && charityID && charity?.registrationNumber) {
+            generateQrCodeData(authorizationID, charityID, charity.registrationNumber);
+        }
+    }, [authorizationID, charityID, charity]);
+
     const handlePrint = () => {
         const printContents = printRef.current.innerHTML;
-
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`
             <html>
                 <head>
-                    <title>Print Payment Confirmation</title>
+                    <title>Print Receipt</title>
                     <style>
                         body {
                             font-family: Arial, sans-serif;
@@ -68,18 +92,17 @@ const PaymentConfirmationPage = () => {
                             border-radius: 8px;
                             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
                             background-color: #fff;
-                        }
-                        .text-center {
                             text-align: center;
                         }
-                        .text-gray-700 {
-                            color: #4a4a4a;
+                        .qr-code {
+                            width: 250px;
+                            height: 250px;
+                            margin: 20px auto;
                         }
-                        .font-semibold {
-                            font-weight: 600;
-                        }
-                        .mb-6 {
-                            margin-bottom: 1.5rem;
+                        @media print {
+                            .print-button {
+                                display: none;
+                            }
                         }
                     </style>
                 </head>
@@ -90,10 +113,8 @@ const PaymentConfirmationPage = () => {
                 </body>
             </html>
         `);
-
         printWindow.document.close();
         printWindow.print();
-        printWindow.close();
     };
 
     if (loading) {
@@ -109,9 +130,17 @@ const PaymentConfirmationPage = () => {
             <div ref={printRef} className="bg-white shadow-lg rounded-lg p-6 w-full max-w-md mx-auto flex flex-col items-center">
                 <h1 className="text-3xl font-bold mb-6 text-center">Payment Confirmation</h1>
 
-                {/* QR Code Placeholder */}
-                <div className="w-48 h-48 bg-gray-200 rounded mb-6 flex items-center justify-center">
-                    <p className="text-gray-500">QR Code will be displayed here.</p>
+                {/* QR Code Section */}
+                <div className="flex items-center justify-center w-full mb-6">
+                    {authorizationID && qrCodeData ? (
+                        <img
+                            src={qrCodeData}
+                            alt="QR Code"
+                            className="w-64 h-64"
+                        />
+                    ) : (
+                        <p className="text-gray-500">QR Code will appear here.</p>
+                    )}
                 </div>
 
                 {/* Charity Details */}
@@ -122,7 +151,7 @@ const PaymentConfirmationPage = () => {
                             <strong>Address:</strong> {charity.address}
                         </p>
                         <p className="text-gray-700 mb-1">
-                            <strong>Registration #:</strong> {charity.registrationNumber}
+                            <strong>Registration Number:</strong> {charity.registrationNumber}
                         </p>
                     </div>
                 ) : (
@@ -131,23 +160,23 @@ const PaymentConfirmationPage = () => {
 
                 {/* Instructions Section */}
                 <div className="text-center mb-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Instructions for Donor</h3>
-                    <p className="text-gray-600">
-                        <strong>Show this QR code at the charity's location to confirm your donation.</strong>
+                    <h3 className="text-lg font-semibold text-gray-800">Instructions for Homeless:</h3>
+                    <p className="text-gray-600 mb-5">
+                        <strong>Show this QR code at the charity to get shelter.</strong>
                     </p>
                 </div>
 
-                {/* Bottom-right Share Message inside the main div */}
+                {/* Bottom-right Share Message */}
                 <p className="text-gray-500 text-xs font-semibold text-right max-w-xs mb-4">
-                    **Share this QR code with someone in need, and they can use it to reach the charity.**
+                    **<strong>Instructions for Donor:</strong> Share this QR code with someone in need, and they can use it to get shelter at our partnered charity.**
                 </p>
 
-                {/* Print Button at the bottom */}
+                {/* Print Receipt Button */}
                 <button
                     onClick={handlePrint}
-                    className="bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow hover:bg-blue-700 transition duration-200 mt-4"
+                    className="print-button bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow hover:bg-blue-700 transition duration-200 mt-4"
                 >
-                    Print Confirmation
+                    Print Receipt to Share with Someone in Need
                 </button>
             </div>
         </div>
